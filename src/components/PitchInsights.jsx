@@ -148,6 +148,20 @@ const PitchInsights = () => {
           <p className="mb-1"><strong>When Ahead:</strong> {insights.aheadInCount} pitches</p>
         </div>
         
+        {/* Outs Situations - New section */}
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="font-bold mb-2">Outs Situations</h2>
+          <p className="mb-1"><strong>0 Outs:</strong> {insights.outsSituation[0]} pitches</p>
+          <p className="mb-1"><strong>1 Out:</strong> {insights.outsSituation[1]} pitches</p>
+          <p className="mb-1"><strong>2 Outs:</strong> {insights.outsSituation[2]} pitches</p>
+          
+          {insights.twoOutPercentages && Object.keys(insights.twoOutPercentages).length > 0 && (
+            <div className="mt-2">
+              <p className="mb-1"><strong>With 2 Outs:</strong> {formatPercentages(insights.twoOutPercentages)}</p>
+            </div>
+          )}
+        </div>
+        
         {/* vs. L/R */}
         <div className="bg-white p-4 rounded shadow">
           <h2 className="font-bold mb-2">vs. Left/Right</h2>
@@ -174,6 +188,16 @@ const PitchInsights = () => {
                 <strong>3-Ball Count:</strong> Watch for {insights.predictions.threeBallPitch.type}
                 <span className="text-sm text-gray-500 ml-1">
                   ({insights.predictions.threeBallPitch.confidence}% confidence)
+                </span>
+              </p>
+            )}
+            
+            {/* Two-outs prediction - New section */}
+            {insights.predictions.twoOuts && (
+              <p className="mb-1">
+                <strong>With 2 Outs:</strong> Likely {insights.predictions.twoOuts.type}
+                <span className="text-sm text-gray-500 ml-1">
+                  ({insights.predictions.twoOuts.confidence}% confidence)
                 </span>
               </p>
             )}

@@ -17,6 +17,7 @@ const PitchTracker = () => {
   const [selectedPitchType, setSelectedPitchType] = useState('fastball');
   const [inning, setInning] = useState(1);
   const [isTop, setIsTop] = useState(true);
+  const [outs, setOuts] = useState(0); // Added outs state
   const [batterSide, setBatterSide] = useState('R'); // R for right, L for left
   const [pitcher, setPitcher] = useState(null);
   const [showAdvancedResults, setShowAdvancedResults] = useState(false);
@@ -43,6 +44,22 @@ const PitchTracker = () => {
     console.log('Selected pitch type:', type);
   };
   
+  // Handle outs changes
+  const changeOuts = (increment) => {
+    if (increment) {
+      // Increase outs, and if we reach 3, move to next half-inning
+      if (outs === 2) {
+        setOuts(0);
+        changeInning(true);
+      } else {
+        setOuts(outs + 1);
+      }
+    } else {
+      // Decrease outs, with minimum of 0
+      setOuts(Math.max(0, outs - 1));
+    }
+  };
+  
   // Log pitch result
   const logPitchResult = (result) => {
     if (!gameId) {
@@ -55,6 +72,7 @@ const PitchTracker = () => {
       gameId,
       inning,
       isTop,
+      outs,           // Added outs to the pitch data
       count: `${balls}-${strikes}`,
       pitchType: selectedPitchType,
       result,
@@ -95,6 +113,11 @@ const PitchTracker = () => {
       // In play - reset count
       setBalls(0);
       setStrikes(0);
+    }
+    
+    // If the result is an out, increment the outs counter
+    if (result === 'out') {
+      changeOuts(true);
     }
   };
   
@@ -151,6 +174,27 @@ const PitchTracker = () => {
         <button 
           onClick={() => changeInning(true)}
           className="bg-blue-700 px-3 py-1 rounded"
+        >
+          &gt;
+        </button>
+      </div>
+      
+      {/* Outs Controls */}
+      <div className="bg-gray-200 p-2 flex justify-between items-center mb-4">
+        <button 
+          onClick={() => changeOuts(false)}
+          className="bg-gray-400 px-3 py-1 rounded"
+          disabled={outs === 0}
+        >
+          &lt;
+        </button>
+        <div className="text-center">
+          <span className="font-bold">Outs: {outs}</span>
+        </div>
+        <button 
+          onClick={() => changeOuts(true)}
+          className="bg-gray-400 px-3 py-1 rounded"
+          disabled={outs === 3}
         >
           &gt;
         </button>

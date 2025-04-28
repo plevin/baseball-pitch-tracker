@@ -30,6 +30,7 @@ export const createPitch = (pitchData = {}) => {
     gameId: null,
     inning: 1,
     isTop: true,
+    outs: 0,         // Added outs field
     count: '0-0',
     pitchType: 'fastball',
     result: 'strike',
@@ -62,6 +63,9 @@ export const validatePitch = (pitch) => {
   
   // Validate isTop
   if (typeof pitch.isTop !== 'boolean') return false;
+  
+  // Validate outs (0-2 is valid)
+  if (typeof pitch.outs !== 'number' || pitch.outs < 0 || pitch.outs > 2) return false;
   
   // Validate count format (balls-strikes)
   const countRegex = /^[0-3]-[0-2]$/;

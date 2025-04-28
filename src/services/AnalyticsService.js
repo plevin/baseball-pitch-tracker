@@ -102,6 +102,46 @@ export const analyzePitcher = (pitches) => {
     resultPercentages[result] = Math.round((results[result] / totalPitches) * 100);
   });
   
+  // Outs situation analysis
+  const outsSituation = {
+    0: pitches.filter(pitch => pitch.outs === 0).length,
+    1: pitches.filter(pitch => pitch.outs === 1).length,
+    2: pitches.filter(pitch => pitch.outs === 2).length,
+  };
+  
+  // Analyze pitch types by outs
+  const pitchTypesByOuts = {};
+  for (let out = 0; out <= 2; out++) {
+    const pitchesByOut = pitches.filter(pitch => pitch.outs === out);
+    if (pitchesByOut.length > 0) {
+      const types = pitchesByOut.reduce((acc, pitch) => {
+        acc[pitch.pitchType] = (acc[pitch.pitchType] || 0) + 1;
+        return acc;
+      }, {});
+      
+      const typesPercentage = {};
+      Object.keys(types).forEach(type => {
+        typesPercentage[type] = Math.round((types[type] / pitchesByOut.length) * 100);
+      });
+      
+      pitchTypesByOuts[out] = typesPercentage;
+    }
+  }
+  
+  // Add two-out pitch tendencies
+  const twoOutPitches = pitches.filter(pitch => pitch.outs === 2);
+  const twoOutTypes = twoOutPitches.reduce((acc, pitch) => {
+    acc[pitch.pitchType] = (acc[pitch.pitchType] || 0) + 1;
+    return acc;
+  }, {});
+  
+  const twoOutPercentages = {};
+  if (twoOutPitches.length > 0) {
+    Object.keys(twoOutTypes).forEach(type => {
+      twoOutPercentages[type] = Math.round((twoOutTypes[type] / twoOutPitches.length) * 100);
+    });
+  }
+  
   // Generate predictions
   const predictions = {};
   
@@ -184,6 +224,18 @@ export const analyzePitcher = (pitches) => {
     };
   }
   
+  // Add predictions for 2-out situations if we have enough data
+  if (twoOutPitches.length >= 3) {
+    const preferredTwoOutPitch = Object.entries(twoOutPercentages)
+      .sort((a, b) => b[1] - a[1])
+      .map(([type]) => type)[0];
+    
+    predictions.twoOuts = {
+      type: preferredTwoOutPitch,
+      confidence: twoOutPercentages[preferredTwoOutPitch]
+    };
+  }
+  
   // Return the complete analysis
   return {
     hasData: true,
@@ -192,6 +244,9 @@ export const analyzePitcher = (pitches) => {
     pitchTypePercentages,
     firstPitchPercentages,
     countMatrix,
+    outsSituation,
+    pitchTypesByOuts,
+    twoOutPercentages,
     aheadInCount: aheadInCount.length,
     behindInCount: behindInCount.length,
     evenCount: evenCount.length,
