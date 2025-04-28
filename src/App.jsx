@@ -1,5 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+//import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import GameSetup from './components/GameSetup';
 import PitcherSelect from './components/PitcherSelect';
 import PitchTracker from './components/PitchTracker';
