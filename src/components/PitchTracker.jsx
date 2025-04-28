@@ -143,30 +143,41 @@ const PitchTracker = () => {
     }
     
     // Update count
-    if (result === 'ball') {
-      if (balls === 3) {
-        // Walk - reset count
-        setBalls(0);
-        setStrikes(0);
-      } else {
-        setBalls(balls + 1);
-      }
-    } else if (result === 'strike' || result === 'foul') {
-      if (strikes === 2 && result === 'foul') {
-        // Foul with 2 strikes stays at 2 strikes
-        setStrikes(2);
-      } else if (strikes === 2) {
-        // Strikeout - reset count
-        setBalls(0);
-        setStrikes(0);
-      } else {
-        setStrikes(strikes + 1);
-      }
-    } else {
-      // In play - reset count
-      setBalls(0);
-      setStrikes(0);
-    }
+if (result === 'ball') {
+  if (balls === 3) {
+    // Walk - reset count
+    setBalls(0);
+    setStrikes(0);
+  } else {
+    setBalls(balls + 1);
+  }
+} else if (result === 'strike') {
+  if (strikes === 2) {
+    // Strikeout - reset count
+    setBalls(0);
+    setStrikes(0);
+  } else {
+    setStrikes(strikes + 1);
+  }
+} else if (result === 'foul') {
+  // For fouls, only increment strikes if less than 2
+  // With 2 strikes, a foul doesn't add a strike (except for foul bunts)
+  if (strikes < 2) {
+    setStrikes(strikes + 1);
+  }
+} else if (result === 'swinging_strike') {
+  if (strikes === 2) {
+    // Strikeout - reset count
+    setBalls(0);
+    setStrikes(0);
+  } else {
+    setStrikes(strikes + 1);
+  }
+} else {
+  // In play - reset count
+  setBalls(0);
+  setStrikes(0);
+}
     
     // If the result is an out, increment the outs counter
     if (result === 'out') {
@@ -311,22 +322,28 @@ const PitchTracker = () => {
         </div>
         
         {!showAdvancedResults ? (
-          // Simple Results
-          <div className="grid grid-cols-2 gap-2">
-            <button 
-              onClick={() => logPitchResult('ball')}
-              className="bg-blue-500 text-white p-2 rounded"
-            >
-              Ball
-            </button>
-            <button 
-              onClick={() => logPitchResult('strike')}
-              className="bg-red-500 text-white p-2 rounded"
-            >
-              Strike
-            </button>
-          </div>
-        ) : (
+  // Simple Results
+  <div className="grid grid-cols-3 gap-2">
+    <button 
+      onClick={() => logPitchResult('ball')}
+      className="bg-blue-500 text-white p-2 rounded"
+    >
+      Ball
+    </button>
+    <button 
+      onClick={() => logPitchResult('strike')}
+      className="bg-red-500 text-white p-2 rounded"
+    >
+      Strike
+    </button>
+    <button 
+      onClick={() => logPitchResult('foul')}
+      className="bg-yellow-500 text-white p-2 rounded"
+    >
+      Foul
+    </button>
+  </div>
+) : (
           // Advanced Results
           <div className="grid grid-cols-2 gap-2">
             <button 
