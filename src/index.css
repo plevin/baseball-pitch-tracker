@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+/* Better touch targets for mobile */
+button, 
+a, 
+input[type="button"], 
+input[type="submit"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Remove blue highlight on touch in mobile Safari */
+* {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
