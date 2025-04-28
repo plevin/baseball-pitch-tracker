@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getPitcherById, savePitch } from '../services/StorageService';
+import { getPitcherById, getPitchesByPitcher, savePitch } from '../services/StorageService';
+import { analyzePitcher } from '../services/AnalyticsService';
 
 const PitchTracker = () => {
   const { pitcherId } = useParams();
@@ -17,14 +18,19 @@ const PitchTracker = () => {
   const [selectedPitchType, setSelectedPitchType] = useState('fastball');
   const [inning, setInning] = useState(1);
   const [isTop, setIsTop] = useState(true);
-  const [outs, setOuts] = useState(0); // Added outs state
+  const [outs, setOuts] = useState(0);
   const [batterSide, setBatterSide] = useState('R'); // R for right, L for left
   const [pitcher, setPitcher] = useState(null);
   const [showAdvancedResults, setShowAdvancedResults] = useState(false);
   
-  // Load pitcher data
+  // Add state for insights
+  const [insights, setInsights] = useState(null);
+  const [pitches, setPitches] = useState([]);
+
+  // Load pitcher data and insights
   useEffect(() => {
-    const loadPitcher = () => {
+    const loadData = async () => {
+      // Get pitcher data
       const pitcherData = getPitcherById(pitcherId);
       setPitcher(pitcherData);
       
@@ -32,11 +38,55 @@ const PitchTracker = () => {
         console.error('Pitcher not found:', pitcherId);
         alert('Pitcher not found');
         navigate('/game');
+        return;
+      }
+      
+      // Get pitch data
+      let pitchData = [];
+      if (gameId) {
+        // Get pitches for this pitcher and game
+        pitchData = getPitchesByPitcher(pitcherId).filter(pitch => pitch.gameId === gameId);
+      } else {
+        // Get all pitches for this pitcher
+        pitchData = getPitchesByPitcher(pitcherId);
+      }
+      
+      setPitches(pitchData);
+      
+      // Generate insights if we have data
+      if (pitchData.length > 0) {
+        const pitcherInsights = analyzePitcher(pitchData);
+        setInsights(pitcherInsights);
       }
     };
     
-    loadPitcher();
-  }, [pitcherId, navigate]);
+    loadData();
+  }, [pitcherId, gameId, navigate]);
+  
+  // Add function to refresh insights after logging a pitch
+  const refreshInsights = () => {
+    const pitchData = getPitchesByPitcher(pitcherId).filter(pitch => 
+      gameId ? pitch.gameId === gameId : true
+    );
+    
+    setPitches(pitchData);
+    
+    if (pitchData.length > 0) {
+      const pitcherInsights = analyzePitcher(pitchData);
+      setInsights(pitcherInsights);
+    }
+  };
+  
+  // Format percentages for display
+  const formatPercentages = (percentages) => {
+    if (!percentages || Object.keys(percentages).length === 0) {
+      return 'No data';
+    }
+    
+    return Object.entries(percentages)
+      .map(([type, percentage]) => `${type}: ${percentage}%`)
+      .join(', ');
+  };
   
   // Select pitch type
   const selectPitchType = (type) => {
@@ -72,7 +122,7 @@ const PitchTracker = () => {
       gameId,
       inning,
       isTop,
-      outs,           // Added outs to the pitch data
+      outs,
       count: `${balls}-${strikes}`,
       pitchType: selectedPitchType,
       result,
@@ -84,6 +134,9 @@ const PitchTracker = () => {
     // Save pitch data
     try {
       savePitch(pitchData);
+      
+      // Refresh insights after saving a pitch
+      refreshInsights();
     } catch (error) {
       console.error('Error saving pitch:', error);
       alert('Failed to save pitch data');
@@ -327,9 +380,95 @@ const PitchTracker = () => {
           onClick={() => navigate(`/insights/${pitcherId}?gameId=${gameId}`)}
           className="bg-blue-600 text-white p-2 rounded"
         >
-          View Insights
+          Full Insights
         </button>
       </div>
+      
+      {/* Live Insights Section - Only show in simple view with enough data */}
+      {!showAdvancedResults && insights && insights.hasData && (
+        <div className="mt-8 border-t pt-4">
+          <h2 className="font-bold mb-4">Live Insights</h2>
+          
+          {insights.totalPitches >= 5 && (
+            <div className="bg-white p-3 rounded shadow mb-3">
+              <h3 className="font-bold text-sm mb-1">Quick Stats</h3>
+              <p className="text-sm mb-1">Pitches: {insights.totalPitches} | Mix: {formatPercentages(insights.pitchTypePercentages)}</p>
+              {insights.resultPercentages && insights.resultPercentages.strike && (
+                <p className="text-sm">Strike %: {insights.resultPercentages.strike}%</p>
+              )}
+            </div>
+          )}
+          
+          {/* Predictions */}
+          {insights.predictions && Object.keys(insights.predictions).length > 0 && (
+            <div className="bg-white p-3 rounded shadow">
+              <h3 className="font-bold text-sm mb-1">Predictions</h3>
+              
+              {/* Current situation-based prediction */}
+              {(() => {
+                // First try to match the current situation
+                if (outs === 2 && insights.predictions.twoOuts) {
+                  return (
+                    <div className="mb-2 bg-yellow-100 p-2 rounded">
+                      <p className="text-sm font-bold">Current Situation (2 outs):</p>
+                      <p className="text-sm">Likely {insights.predictions.twoOuts.type} ({insights.predictions.twoOuts.confidence}%)</p>
+                    </div>
+                  );
+                }
+                
+                if (balls === 3 && insights.predictions.threeBallPitch) {
+                  return (
+                    <div className="mb-2 bg-yellow-100 p-2 rounded">
+                      <p className="text-sm font-bold">Current Situation (3-ball count):</p>
+                      <p className="text-sm">Likely {insights.predictions.threeBallPitch.type} ({insights.predictions.threeBallPitch.confidence}%)</p>
+                    </div>
+                  );
+                }
+                
+                if (balls === 0 && strikes === 0 && insights.predictions.firstPitch) {
+                  return (
+                    <div className="mb-2 bg-yellow-100 p-2 rounded">
+                      <p className="text-sm font-bold">Current Situation (first pitch):</p>
+                      <p className="text-sm">Likely {insights.predictions.firstPitch.type} ({insights.predictions.firstPitch.confidence}%)</p>
+                    </div>
+                  );
+                }
+                
+                // Default - just show the most confident prediction
+                const allPredictions = Object.values(insights.predictions);
+                if (allPredictions.length > 0) {
+                  const bestPrediction = allPredictions.sort((a, b) => b.confidence - a.confidence)[0];
+                  const predictionType = Object.keys(insights.predictions).find(
+                    key => insights.predictions[key] === bestPrediction
+                  );
+                  
+                  let situationName = "Unknown";
+                  if (predictionType === 'firstPitch') situationName = "First Pitch";
+                  else if (predictionType === 'threeBallPitch') situationName = "3-Ball Count";
+                  else if (predictionType === 'twoOuts') situationName = "2 Outs";
+                  else if (predictionType === 'vsLefty') situationName = "vs Left-handed";
+                  else if (predictionType === 'vsRighty') situationName = "vs Right-handed";
+                  
+                  return (
+                    <div className="mb-2">
+                      <p className="text-sm font-bold">{situationName}:</p>
+                      <p className="text-sm">Likely {bestPrediction.type} ({bestPrediction.confidence}%)</p>
+                    </div>
+                  );
+                }
+                
+                return null;
+              })()}
+              
+              {insights.quality === 'low' && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Note: Limited data available. Predictions may not be reliable.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
