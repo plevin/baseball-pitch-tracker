@@ -245,18 +245,28 @@ const PitchTracker = () => {
         </div>
       </div>
       
-      <div className="mt-8 grid grid-cols-2 gap-2">
+      <div className="mt-8 space-y-2">
+        <div className="grid grid-cols-2 gap-2">
+          <button 
+            onClick={resetCount}
+            className="bg-gray-500 text-white p-2 rounded"
+          >
+            Reset Count
+          </button>
+          <button 
+            onClick={() => navigate(`/insights/${pitcherId}?gameId=${gameId}`)}
+            className="bg-blue-600 text-white p-2 rounded"
+          >
+            View Insights
+          </button>
+        </div>
+        
+        {/* Added Enhanced Insights Button */}
         <button 
-          onClick={resetCount}
-          className="bg-gray-500 text-white p-2 rounded"
+          onClick={() => navigate(`/enhanced-insights/${pitcherId}?gameId=${gameId}`)}
+          className="w-full bg-indigo-600 text-white p-2 rounded font-bold"
         >
-          Reset Count
-        </button>
-        <button 
-          onClick={() => navigate(`/insights/${pitcherId}?gameId=${gameId}`)}
-          className="bg-blue-600 text-white p-2 rounded"
-        >
-          View Insights
+          Enhanced Analytics
         </button>
       </div>
     </div>
