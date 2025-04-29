@@ -14,6 +14,7 @@ const PitchTracker = () => {
   // Basic state
   const [balls, setBalls] = useState(0);
   const [strikes, setStrikes] = useState(0);
+  const [outs, setOuts] = useState(0);
   const [selectedPitchType, setSelectedPitchType] = useState('fastball');
   const [inning, setInning] = useState(1);
   const [isTop, setIsTop] = useState(true);
@@ -40,6 +41,22 @@ const PitchTracker = () => {
   const selectPitchType = (type) => {
     setSelectedPitchType(type);
     console.log('Selected pitch type:', type);
+  };
+  
+  // Handle outs logic
+  const incrementOuts = () => {
+    if (outs === 2) {
+      // Move to next half-inning when reaching 3 outs
+      setOuts(0);
+      if (isTop) {
+        setIsTop(false); // Move to bottom of inning
+      } else {
+        setInning(inning + 1); // Move to next inning
+        setIsTop(true);
+      }
+    } else {
+      setOuts(outs + 1);
+    }
   };
   
   // Log pitch result
@@ -79,19 +96,27 @@ const PitchTracker = () => {
       } else {
         setBalls(balls + 1);
       }
-    } else if (result === 'strike' || result === 'foul') {
-      if (strikes === 2 && result === 'foul') {
-        // Foul with 2 strikes stays at 2 strikes
-        setStrikes(2);
-      } else if (strikes === 2) {
-        // Strikeout - reset count
+    } else if (result === 'strike' || result === 'swinging_strike') {
+      if (strikes === 2) {
+        // Strikeout - reset count and increment outs
         setBalls(0);
         setStrikes(0);
+        incrementOuts(); // Add this line to increment outs on strikeouts
       } else {
         setStrikes(strikes + 1);
       }
+    } else if (result === 'foul') {
+      if (strikes < 2) {
+        setStrikes(strikes + 1);
+      }
+      // Foul with 2 strikes stays at 2 strikes
+    } else if (result === 'out') {
+      // In play out - reset count and increment outs
+      setBalls(0);
+      setStrikes(0);
+      incrementOuts();
     } else {
-      // In play - reset count
+      // Hit or other result - reset count
       setBalls(0);
       setStrikes(0);
     }
@@ -102,16 +127,20 @@ const PitchTracker = () => {
     if (increment) {
       if (isTop) {
         setIsTop(false); // Move from top to bottom of inning
+        setOuts(0); // Reset outs for new half-inning
       } else {
         setInning(inning + 1); // Move to next inning
         setIsTop(true);
+        setOuts(0); // Reset outs for new half-inning
       }
     } else {
       if (!isTop) {
         setIsTop(true); // Move from bottom to top of inning
+        setOuts(0); // Reset outs for new half-inning
       } else if (inning > 1) {
         setInning(inning - 1); // Move to previous inning
         setIsTop(false);
+        setOuts(0); // Reset outs for new half-inning
       }
     }
   };
@@ -155,10 +184,14 @@ const PitchTracker = () => {
         </button>
       </div>
       
-      <div className="text-center mb-4">
+      <div className="flex justify-between items-center mb-4">
         <div className="text-lg">
           <span className="font-bold">Count: </span>
           <span>{balls}-{strikes}</span>
+        </div>
+        <div className="text-lg">
+          <span className="font-bold">Outs: </span>
+          <span>{outs}</span>
         </div>
       </div>
       
@@ -261,7 +294,7 @@ const PitchTracker = () => {
           </button>
         </div>
         
-        {/* Added Enhanced Insights Button */}
+        {/* Enhanced Insights Button */}
         <button 
           onClick={() => navigate(`/enhanced-insights/${pitcherId}?gameId=${gameId}`)}
           className="w-full bg-indigo-600 text-white p-2 rounded font-bold"
