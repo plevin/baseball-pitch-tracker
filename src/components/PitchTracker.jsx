@@ -143,44 +143,43 @@ const PitchTracker = () => {
     }
     
     // Update count
-if (result === 'ball') {
-  if (balls === 3) {
-    // Walk - reset count
-    setBalls(0);
-    setStrikes(0);
-  } else {
-    setBalls(balls + 1);
-  }
-} else if (result === 'strike') {
-  if (strikes === 2) {
-    // Strikeout - reset count
-    setBalls(0);
-    setStrikes(0);
-  } else {
-    setStrikes(strikes + 1);
-  }
-} else if (result === 'foul') {
-  // For fouls, only increment strikes if less than 2
-  // With 2 strikes, a foul doesn't add a strike (except for foul bunts)
-  if (strikes < 2) {
-    setStrikes(strikes + 1);
-  }
-} else if (result === 'swinging_strike') {
-  if (strikes === 2) {
-    // Strikeout - reset count
-    setBalls(0);
-    setStrikes(0);
-  } else {
-    setStrikes(strikes + 1);
-  }
-} else {
-  // In play - reset count
-  setBalls(0);
-  setStrikes(0);
-}
-    
-    // If the result is an out, increment the outs counter
-    if (result === 'out') {
+    if (result === 'ball') {
+      if (balls === 3) {
+        // Walk - reset count
+        setBalls(0);
+        setStrikes(0);
+      } else {
+        setBalls(balls + 1);
+      }
+    } else if (result === 'strike') {
+      if (strikes === 2) {
+        // Strikeout - reset count
+        setBalls(0);
+        setStrikes(0);
+      } else {
+        setStrikes(strikes + 1);
+      }
+    } else if (result === 'foul') {
+      // For fouls, only increment strikes if less than 2
+      if (strikes < 2) {
+        setStrikes(strikes + 1);
+      }
+    } else if (result === 'swinging_strike') {
+      if (strikes === 2) {
+        // Strikeout - reset count
+        setBalls(0);
+        setStrikes(0);
+      } else {
+        setStrikes(strikes + 1);
+      }
+    } else if (result === 'hit') {
+      // Hit - reset count
+      setBalls(0);
+      setStrikes(0);
+    } else if (result === 'out') {
+      // Out in play - reset count and increment outs
+      setBalls(0);
+      setStrikes(0);
       changeOuts(true);
     }
   };
@@ -322,28 +321,46 @@ if (result === 'ball') {
         </div>
         
         {!showAdvancedResults ? (
-  // Simple Results
-  <div className="grid grid-cols-3 gap-2">
-    <button 
-      onClick={() => logPitchResult('ball')}
-      className="bg-blue-500 text-white p-2 rounded"
-    >
-      Ball
-    </button>
-    <button 
-      onClick={() => logPitchResult('strike')}
-      className="bg-red-500 text-white p-2 rounded"
-    >
-      Strike
-    </button>
-    <button 
-      onClick={() => logPitchResult('foul')}
-      className="bg-yellow-500 text-white p-2 rounded"
-    >
-      Foul
-    </button>
-  </div>
-) : (
+          // Simple Results - Now includes all pitch result types
+          <div className="grid grid-cols-2 gap-2">
+            <button 
+              onClick={() => logPitchResult('ball')}
+              className="bg-blue-500 text-white p-2 rounded"
+            >
+              Ball
+            </button>
+            <button 
+              onClick={() => logPitchResult('strike')}
+              className="bg-red-500 text-white p-2 rounded"
+            >
+              Strike
+            </button>
+            <button 
+              onClick={() => logPitchResult('foul')}
+              className="bg-yellow-500 text-white p-2 rounded"
+            >
+              Foul
+            </button>
+            <button 
+              onClick={() => logPitchResult('swinging_strike')}
+              className="bg-purple-500 text-white p-2 rounded"
+            >
+              Swing & Miss
+            </button>
+            <button 
+              onClick={() => logPitchResult('hit')}
+              className="bg-green-500 text-white p-2 rounded"
+            >
+              Hit
+            </button>
+            <button 
+              onClick={() => logPitchResult('out')}
+              className="bg-gray-500 text-white p-2 rounded"
+            >
+              Out
+            </button>
+          </div>
+        ) : (
           // Advanced Results
           <div className="grid grid-cols-2 gap-2">
             <button 
@@ -411,7 +428,10 @@ if (result === 'ball') {
               <h3 className="font-bold text-sm mb-1">Quick Stats</h3>
               <p className="text-sm mb-1">Pitches: {insights.totalPitches} | Mix: {formatPercentages(insights.pitchTypePercentages)}</p>
               {insights.resultPercentages && insights.resultPercentages.strike && (
-                <p className="text-sm">Strike %: {insights.resultPercentages.strike}%</p>
+                <p className="text-sm mb-1">Strike %: {insights.resultPercentages.strike}%</p>
+              )}
+              {insights.swingAndMissRate !== undefined && insights.contactRate !== undefined && (
+                <p className="text-sm">Swing & Miss: {insights.swingAndMissRate}% | Contact: {insights.contactRate}%</p>
               )}
             </div>
           )}

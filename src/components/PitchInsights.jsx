@@ -134,6 +134,26 @@ const PitchInsights = () => {
           )}
         </div>
         
+        {/* Pitch Results */}
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="font-bold mb-2">Pitch Results</h2>
+          <p className="mb-1"><strong>Contact Rate:</strong> {insights.contactRate}%</p>
+          <p className="mb-1"><strong>Swing & Miss Rate:</strong> {insights.swingAndMissRate}%</p>
+          <p className="mb-1"><strong>Hit Rate (on contact):</strong> {insights.hitRate}%</p>
+          <p className="mb-1"><strong>Out Rate (on contact):</strong> {insights.outRate}%</p>
+        </div>
+        
+        {/* Pitch Effectiveness */}
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="font-bold mb-2">Pitch Effectiveness</h2>
+          {Object.entries(insights.pitchEffectiveness).map(([type, data]) => (
+            <div key={type} className="mb-2">
+              <p className="font-bold">{type.charAt(0).toUpperCase() + type.slice(1)}</p>
+              <p className="text-sm ml-2">Strikes: {data.strikePercentage}% | Swing & Miss: {data.swingAndMissPercentage}%</p>
+            </div>
+          ))}
+        </div>
+        
         {/* First Pitch Tendencies */}
         <div className="bg-white p-4 rounded shadow">
           <h2 className="font-bold mb-2">First Pitch Tendencies</h2>
@@ -148,7 +168,7 @@ const PitchInsights = () => {
           <p className="mb-1"><strong>When Ahead:</strong> {insights.aheadInCount} pitches</p>
         </div>
         
-        {/* Outs Situations - New section */}
+        {/* Outs Situations */}
         <div className="bg-white p-4 rounded shadow">
           <h2 className="font-bold mb-2">Outs Situations</h2>
           <p className="mb-1"><strong>0 Outs:</strong> {insights.outsSituation[0]} pitches</p>
@@ -192,7 +212,7 @@ const PitchInsights = () => {
               </p>
             )}
             
-            {/* Two-outs prediction - New section */}
+            {/* Two-outs prediction */}
             {insights.predictions.twoOuts && (
               <p className="mb-1">
                 <strong>With 2 Outs:</strong> Likely {insights.predictions.twoOuts.type}

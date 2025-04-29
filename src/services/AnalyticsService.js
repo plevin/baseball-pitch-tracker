@@ -142,6 +142,52 @@ export const analyzePitcher = (pitches) => {
     });
   }
   
+  // Calculate contact rate (fouls + hits + outs)
+  const contactPitches = pitches.filter(pitch => 
+    pitch.result === 'foul' || pitch.result === 'hit' || pitch.result === 'out'
+  );
+  const contactRate = Math.round((contactPitches.length / totalPitches) * 100);
+
+  // Calculate swing and miss rate
+  const swingingStrikes = pitches.filter(pitch => pitch.result === 'swinging_strike');
+  const swingAndMissRate = Math.round((swingingStrikes.length / totalPitches) * 100);
+
+  // Calculate hit rate vs out rate on contact
+  const hitsOnContact = pitches.filter(pitch => pitch.result === 'hit').length;
+  const outsOnContact = pitches.filter(pitch => pitch.result === 'out').length;
+  const hitRate = contactPitches.length > 0 
+    ? Math.round((hitsOnContact / contactPitches.length) * 100) 
+    : 0;
+  const outRate = contactPitches.length > 0 
+    ? Math.round((outsOnContact / contactPitches.length) * 100) 
+    : 0;
+
+  // Calculate pitch effectiveness by result
+  const pitchEffectiveness = {};
+  Object.keys(pitchTypes).forEach(type => {
+    const pitchesOfType = pitches.filter(pitch => pitch.pitchType === type);
+    if (pitchesOfType.length > 0) {
+      const strikes = pitchesOfType.filter(pitch => 
+        pitch.result === 'strike' || 
+        pitch.result === 'foul' || 
+        pitch.result === 'swinging_strike' ||
+        pitch.result === 'out'
+      ).length;
+      const strikePercentage = Math.round((strikes / pitchesOfType.length) * 100);
+      
+      const swingAndMiss = pitchesOfType.filter(pitch => 
+        pitch.result === 'swinging_strike'
+      ).length;
+      const swingAndMissPercentage = Math.round((swingAndMiss / pitchesOfType.length) * 100);
+      
+      pitchEffectiveness[type] = {
+        pitches: pitchesOfType.length,
+        strikePercentage,
+        swingAndMissPercentage
+      };
+    }
+  });
+  
   // Generate predictions
   const predictions = {};
   
@@ -254,6 +300,11 @@ export const analyzePitcher = (pitches) => {
     vsRight: vsRight.length,
     results,
     resultPercentages,
+    contactRate,
+    swingAndMissRate,
+    hitRate,
+    outRate,
+    pitchEffectiveness,
     predictions,
     quality: totalPitches < 10 ? 'low' : totalPitches < 20 ? 'medium' : 'high'
   };
