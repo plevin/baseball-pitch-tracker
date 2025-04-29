@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getGames, getPitchers, exportAllData, importAllData } from '../services/StorageService';
+// Import the logo directly in the React component
+import logoImage from '../assets/logo.png'; // You'll need to add the logo to this path
 
 const WelcomeScreen = () => {
   const navigate = useNavigate();
@@ -163,10 +165,10 @@ const WelcomeScreen = () => {
     <div className="p-4 max-w-md mx-auto">
       {/* Custom Logo and Title */}
       <div className="text-center mb-8 mt-4">
-        {/* Logo - Using the image file */}
+        {/* Logo - Using the imported image file */}
         <div className="w-48 h-48 mx-auto mb-2 flex items-center justify-center">
           <img 
-            src="/images/logo.png" 
+            src={logoImage} 
             alt="Baseball Pitch Tracker Logo" 
             className="w-full h-full object-contain"
           />
