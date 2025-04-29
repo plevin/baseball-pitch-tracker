@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getGames, getPitchers, exportAllData, importAllData } from '../services/StorageService';
+import { getGames, getPitchers, getPitchesByPitcher, exportAllData, importAllData } from '../services/StorageService';
 // Import the logo directly in the React component
 import logoImage from '../assets/logo.png'; // You'll need to add the logo to this path
 
@@ -33,6 +33,23 @@ const WelcomeScreen = () => {
   // Handle continuing an existing game
   const handleContinueGame = (gameId) => {
     navigate(`/pitcher-select/${gameId}`);
+  };
+
+  // Handle viewing pitcher insights
+  const viewPitcherInsights = (pitcher) => {
+    // Get most recent game for this pitcher
+    const pitcherPitches = getPitchesByPitcher(pitcher.id);
+    
+    if (pitcherPitches.length === 0) {
+      alert("No pitches have been tracked for this pitcher yet.");
+      return;
+    }
+    
+    const gameIds = [...new Set(pitcherPitches.map(pitch => pitch.gameId))];
+    const mostRecentGameId = gameIds.sort().reverse()[0];
+    
+    // Navigate to enhanced insights for this pitcher
+    navigate(`/enhanced-insights/${pitcher.id}?gameId=${mostRecentGameId}`);
   };
   
   // Handle exporting data
@@ -250,15 +267,19 @@ const WelcomeScreen = () => {
           <h2 className="text-lg font-bold mb-2 text-gray-700">{teamName} Pitchers</h2>
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {pitchers.filter(p => p.team === 'our').map(pitcher => (
-              <div
+              <button
                 key={pitcher.id}
-                className="w-full bg-white p-3 rounded-lg shadow-sm text-left flex justify-between items-center"
+                onClick={() => viewPitcherInsights(pitcher)}
+                className="w-full bg-white p-3 rounded-lg shadow-sm text-left flex justify-between items-center hover:bg-gray-50"
               >
                 <div className="flex items-center">
                   <span className="font-medium">{pitcher.name}</span>
                   <span className="text-sm text-gray-500 ml-2">#{pitcher.number}</span>
                 </div>
-              </div>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
             ))}
             
             <button
