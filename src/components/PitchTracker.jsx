@@ -403,6 +403,7 @@ const PitchTracker = () => {
         )}
       </div>
       
+      {/* Replace the existing button with this */}
       <div className="mt-8 grid grid-cols-2 gap-2">
         <button 
           onClick={resetCount}
@@ -410,12 +411,22 @@ const PitchTracker = () => {
         >
           Reset Count
         </button>
-        <button 
-          onClick={() => navigate(`/insights/${pitcherId}?gameId=${gameId}`)}
-          className="bg-blue-600 text-white p-2 rounded"
-        >
-          Full Insights
-        </button>
+  
+        <div className="flex flex-col gap-2">
+          <button 
+            onClick={() => navigate(`/insights/${pitcherId}?gameId=${gameId}`)}
+            className="bg-blue-600 text-white p-2 rounded"
+          >
+            View Insights
+          </button>
+    
+          <button 
+            onClick={() => navigate(`/enhanced-insights/${pitcherId}?gameId=${gameId}`)}
+            className="bg-green-600 text-white p-2 rounded"
+          >
+            View Enhanced Insights
+          </button>
+        </div>
       </div>
       
       {/* Live Insights Section - Only show in simple view with enough data */}

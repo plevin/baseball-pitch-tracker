@@ -15,7 +15,10 @@ function App() {
         <Route path="/game" element={<GameSetup />} />
         <Route path="/pitcher-select/:gameId" element={<PitcherSelect />} />
         <Route path="/track/:pitcherId" element={<PitchTracker />} />
+        {/* Original insights path */}
         <Route path="/insights/:pitcherId" element={<PitchInsights />} />
+        {/* New enhanced insights path */}
+        <Route path="/enhanced-insights/:pitcherId" element={<EnhancedPitchInsights />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
