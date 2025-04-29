@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, HashRouter } from 'react-router-dom'
 import './App.css'
 
 // Import Components
@@ -11,8 +11,9 @@ import EnhancedPitchInsights from './components/EnhancedPitchInsights'
 import Settings from './components/Settings'
 
 function App() {
+  // Using HashRouter instead of BrowserRouter to avoid the subdirectory issues
   return (
-    <Router>
+    <HashRouter>
       <div className="min-h-screen bg-gray-100">
         <Routes>
           <Route path="/" element={<Navigate to="/game" replace />} />
@@ -24,7 +25,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </div>
-    </Router>
+    </HashRouter>
   )
 }
 
