@@ -11,6 +11,7 @@ import PitchTracker from './components/PitchTracker'
 import PitchInsights from './components/PitchInsights'
 import EnhancedPitchInsights from './components/EnhancedPitchInsights'
 import ScoutScreen from './components/ScoutScreen'
+import TeamManagementScreen from './components/TeamManagementScreen'
 import Settings from './components/Settings'
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           <Route path="/insights/:pitcherId" element={<PitchInsights />} />
           <Route path="/enhanced-insights/:pitcherId" element={<EnhancedPitchInsights />} />
           <Route path="/scout" element={<ScoutScreen />} />
+          <Route path="/team" element={<TeamManagementScreen />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
         <Navigation />

@@ -9,6 +9,7 @@ const WelcomeScreen = () => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [importStatus, setImportStatus] = useState(null);
   const [exportStatus, setExportStatus] = useState(null);
+  const [teamName, setTeamName] = useState(localStorage.getItem('ourTeamName') || 'Our Team');
   
   // Load existing data
   useEffect(() => {
@@ -186,16 +187,27 @@ const WelcomeScreen = () => {
           Start New Game
         </button>
         
-        {/* Scout Pitchers Link - Updated to go to scout screen */}
+        {/* Team Management Link */}
+        <button 
+          onClick={() => navigate('/team')}
+          className="bg-baseball-green text-white p-4 rounded-lg shadow-md flex items-center justify-center"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          Manage Teams
+        </button>
+        
+        {/* Scout Pitchers Link */}
         <button 
           onClick={() => navigate('/scout')}
-          className="bg-baseball-green text-white p-4 rounded-lg shadow-md flex items-center justify-center"
+          className="bg-baseball-red text-white p-4 rounded-lg shadow-md flex items-center justify-center"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
-          Scout Pitchers
+          Scout Opponents
         </button>
       </div>
       
@@ -226,6 +238,33 @@ const WelcomeScreen = () => {
                 View All Games
               </button>
             )}
+          </div>
+        </div>
+      )}
+      
+      {/* Your Team's Pitchers (if any) */}
+      {pitchers.filter(p => p.team === 'our').length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-bold mb-2 text-gray-700">{teamName} Pitchers</h2>
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {pitchers.filter(p => p.team === 'our').map(pitcher => (
+              <div
+                key={pitcher.id}
+                className="w-full bg-white p-3 rounded-lg shadow-sm text-left flex justify-between items-center"
+              >
+                <div className="flex items-center">
+                  <span className="font-medium">{pitcher.name}</span>
+                  <span className="text-sm text-gray-500 ml-2">#{pitcher.number}</span>
+                </div>
+              </div>
+            ))}
+            
+            <button
+              onClick={() => navigate('/team')}
+              className="w-full text-center text-baseball-blue py-2"
+            >
+              Manage Team
+            </button>
           </div>
         </div>
       )}
