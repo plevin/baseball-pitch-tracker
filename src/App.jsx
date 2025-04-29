@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate, HashRouter } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 
 // Import Components
+import WelcomeScreen from './components/WelcomeScreen'
 import GameSetup from './components/GameSetup'
 import PitcherSelect from './components/PitcherSelect'
 import PitchTracker from './components/PitchTracker'
@@ -11,12 +12,11 @@ import EnhancedPitchInsights from './components/EnhancedPitchInsights'
 import Settings from './components/Settings'
 
 function App() {
-  // Using HashRouter instead of BrowserRouter to avoid the subdirectory issues
   return (
     <HashRouter>
       <div className="min-h-screen bg-gray-100">
         <Routes>
-          <Route path="/" element={<Navigate to="/game" replace />} />
+          <Route path="/" element={<WelcomeScreen />} />
           <Route path="/game" element={<GameSetup />} />
           <Route path="/pitcher-select/:gameId" element={<PitcherSelect />} />
           <Route path="/track/:pitcherId" element={<PitchTracker />} />
